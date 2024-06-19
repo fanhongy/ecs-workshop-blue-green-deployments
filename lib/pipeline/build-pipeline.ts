@@ -71,7 +71,8 @@ export class EcsBlueGreenPipeline extends Construct {
         // S3 bucket for storing the code pipeline artifacts
         const artifactsBucket = new s3.Bucket(this, 'artifactsBucket', {
             encryption: s3.BucketEncryption.S3_MANAGED,
-            blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL
+            blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL, 
+            enforceSSL: true
         });
 
         // S3 bucket policy for the code pipeline artifacts
@@ -155,6 +156,16 @@ export class EcsBlueGreenPipeline extends Construct {
                             project: codeBuildProject,
                             input: sourceArtifact,
                             outputs: [buildArtifact]
+                        })
+                    ]
+                },
+                {
+                    stageName: 'ManualApproval',
+                    actions: [
+                        new codePipelineActions.ManualApprovalAction({
+                            actionName: 'Approval',
+                            additionalInformation: 'Approve service deployment?',
+                            runOrder: 1
                         })
                     ]
                 },
